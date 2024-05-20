@@ -1,0 +1,27 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
+# Load the dataset
+iris = pd.read_csv("Iris.csv") 
+
+# Encode the target labels
+label_encoder = LabelEncoder()
+iris['Species'] = label_encoder.fit_transform(iris['Species'])
+
+# Prepare the data
+# X = iris.drop(columns=['Species'])  # Remove this line
+# y = iris['Species']
+
+# Plot scattered points
+plt.figure(figsize=(8, 6))
+for Species in iris['Species'].unique():
+    plt.scatter(iris[y == Species]['SepalLengthCm'], iris[y == Species]['SepalWidthCm'], label=label_encoder.inverse_transform([Species])[0])
+
+# Adding axes annotations
+plt.xlabel('Sepal Length (cm)')
+plt.ylabel('Sepal Width (cm)')
+plt.title('Scattered Points of Iris Dataset')
+plt.legend()
+plt.show()
