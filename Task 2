@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Step 1: Load the dataset
+unemployment_data = pd.read_csv("Unemployment in India.csv")  # Replace "your_dataset.csv" with the path to your dataset
+
+# Step 2: Data Preprocessing
+# Display the first few rows of the dataset
+print(unemployment_data.head())
+
+# Check for missing values
+print(unemployment_data.isnull().sum())
+
+# If necessary, handle missing values (e.g., by filling or dropping)
+unemployment_data = unemployment_data.dropna()
+
+# Step 3: Exploratory Data Analysis (EDA)
+# Plot the unemployment rate by region
+plt.figure(figsize=(12, 8))
+sns.boxplot(x='Region', y=' Estimated Unemployment Rate (%)', data=unemployment_data)
+plt.title('Estimated Unemployment Rate by Region')
+plt.xlabel('Region')
+plt.ylabel('Estimated Unemployment Rate (%)')
+plt.xticks(rotation=45)
+plt.grid(True)
+plt.show()
+
+# Step 4: Visualization
+# Plot the distribution of unemployment rates
+plt.figure(figsize=(8, 6))
+sns.histplot(unemployment_data[' Estimated Unemployment Rate (%)'], kde=True, bins=20)
+plt.title('Distribution of Estimated Unemployment Rates')
+plt.xlabel('Estimated Unemployment Rate (%)')
+plt.ylabel('Frequency')
+plt.show()
+
+# Step 5: Modeling (Optional)
+# Prepare the feature matrix (X) and the target vector (y)
+X = unemployment_data[[' Estimated Employed', ' Estimated Labour Participation Rate (%)']]
+y = unemployment_data[' Estimated Unemployment Rate (%)']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Mean Squared Error: {mse}")
+print(f"R-squared: {r2}")
+
+# Plot the actual vs predicted unemployment rates
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, y_pred)
+plt.title('Actual vs Predicted Unemployment Rates')
+plt.xlabel('Actual Unemployment Rate (%)')
+plt.ylabel('Predicted Unemployment Rate (%)')
+plt.grid(True)
+plt.show()
