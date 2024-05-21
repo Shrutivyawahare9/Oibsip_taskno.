@@ -1,0 +1,74 @@
+import pandas as pd
+
+# Load the dataset
+emails = pd.read_csv("spam.csv", encoding='latin-1')
+
+# Display the first few rows of the dataset
+print(emails.head())
+
+# Rename columns for clarity
+emails.columns = ['Label', 'Email', 'Original_Column_3', 'Original_Column_4', 'Original_Column_5']
+
+# Display the first few rows after renaming
+print(emails.head())
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+import re
+import string
+
+# Encode labels: spam -> 1, ham -> 0
+label_encoder = LabelEncoder()
+emails['Label'] = label_encoder.fit_transform(emails['Label'])
+
+# Function to clean email text
+def clean_text(text):
+    text = text.lower()  # Lowercase text
+    text = re.sub(r'\d+', '', text)  # Remove numbers
+    text = re.sub(r'\s+', ' ', text)  # Remove extra spaces
+    text = text.translate(str.maketrans('', '', string.punctuation))  # Remove punctuation
+    return text
+
+# Apply text cleaning
+emails['Email'] = emails['Email'].apply(clean_text)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(emails['Email'], emails['Label'], test_size=0.2, random_state=42)
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Vectorize the email text data
+vectorizer = TfidfVectorizer(max_features=5000)
+X_train_vectorized = vectorizer.fit_transform(X_train)
+X_test_vectorized = vectorizer.transform(X_test)
+
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Train the Naive Bayes classifier
+model = MultinomialNB()
+model.fit(X_train_vectorized, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test_vectorized)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+
+# Print classification report
+print(classification_report(y_test, y_pred))
+
+# Print confusion matrix
+print(confusion_matrix(y_test, y_pred))
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Plot confusion matrix
+conf_matrix = confusion_matrix(y_test, y_pred)
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=['Ham', 'Spam'], yticklabels=['Ham', 'Spam'])
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
